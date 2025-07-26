@@ -11,3 +11,15 @@ Bootloading sequence:-
 - BIOS finds bootable device (e.g., hard drive, USB).
 - Reads first sector (512 bytes) into memory at 0x7C00.
 - Jumps to 0x7C00 and starts executing → your bootloader.
+
+What does `gcc` do?
+- When you run:
+```bash
+gcc hello.c -o hello
+```
+
+You're not just calling one tool. gcc is a driver program — it internally calls:
+1. Preprocessor – cpp
+2. Compiler – cc12
+3. Assembler – as (or i686-elf-as if cross)
+4. Linker – ld (or i686-elf-ld if cross)
