@@ -89,3 +89,14 @@ hello.o
    ⬇ (Linking: produces final executable done why Linker)
 hello (ELF binary or .exe)
 ```
+
+## Assembly commands to move data
+```
+mov byte [...] → move 1 byte
+
+mov word [...] → move 2 bytes (16 bits)
+
+mov dword [...] → move 4 bytes (32 bits)
+
+mov qword [...] → move 8 bytes (64 bits)
+```
