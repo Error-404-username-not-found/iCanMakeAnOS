@@ -1,10 +1,63 @@
 ## Barebone OS building Steps:-
-- Build a bootloader in NASM (512 bytes) that loads and starts the kernel
-- Kernel Core	Memory setup, hardware abstraction
-- Interrupt Handling	Basic CPU and device interrupt support
-- I/O	VGA/serial output, keyboard input
-- Process Handling (opt.)	Run a task or process
-- System Call Interface	Optional communication to kernel
+
+### **1. Define OS Goals**
+
+* What is it for? (PC, embedded, hobby, etc.)
+* GUI or command-line?
+* Unique features?
+
+### **2. Set Up Development Environment**
+
+* Install a compiler (like GCC)
+* Use an emulator (like QEMU or VirtualBox)
+* Set up cross-compiling tools
+
+
+### **3. Choose a Programming Language**
+
+* Usually C and Assembly
+* Optionally C++, Rust, or others
+
+
+### **4. Create a Bootloader**
+
+* Use GRUB or write your own
+* Loads your OS kernel into memory
+
+
+### **5. Write the Kernel**
+
+* Handle memory management
+* Handle CPU scheduling
+* Handle basic I/O (keyboard, screen)
+
+
+### **6. Add Drivers**
+
+* Keyboard, display, disk, etc.
+
+
+### **7. Build File System Support**
+
+* FAT, ext2, or your own
+
+
+### **8. Create a Shell or GUI**
+
+* Basic command interface or graphics window system
+
+
+### **9. Build User Programs Support**
+
+* Allow programs to run on your OS
+
+
+### **10. Test, Debug, and Improve**
+
+* Use QEMU and real hardware testing
+* Fix bugs, improve performance, add features
+
+
 
 ## Bootloading sequence:-
 - Power on → BIOS runs POST (Power-On Self-Test).
