@@ -1,71 +1,94 @@
-[org 0x7C00]
-Tells the assembler that this code will be loaded at memory address 0x7C00.
-Why? Because that's where the BIOS loads the boot sector by default.
+# 🧠 Bootloader Assembly Code Breakdown (Real Mode, NASM Syntax)
 
-start:
-A label marking the beginning of your bootloader’s execution. It’s useful for jumps and clarity.
+### `[org 0x7C00]`
 
-mov si, message
-Loads the address of the message string into register SI.
-This sets up for looping through the string using lodsb.
+* Tells the assembler this code will be loaded at memory address `0x7C00`.
+* Why? Because the **BIOS loads the boot sector** into this address by default.
 
-print_loop:
-Label used as the start of the print loop. We'll jump back here after printing each character.
+### `start:`
 
-lodsb
-Loads a byte from the address in SI into AL, and increments SI.
-It's shorthand for:
+* A **label** marking the beginning of the bootloader's execution.
+* Useful for `jmp` instructions and readability.
 
-asm
-Copy
-Edit
-mov al, [si]
-inc si
-We're reading the next character from the message.
+### `mov si, message`
 
-cmp al, 0
-Compares the character in AL with 0.
-If it’s 0, we’ve reached the end of the string (null terminator).
+* Loads the address of the `message` string into the `SI` register.
+* Sets up for looping through the string using `lodsb`.
 
-je hang
-If cmp found that AL is 0, this means the message is done — so we jump to hang: to stop.
+### `print_loop:`
 
-mov ah, 0x0E
-Sets AH = 0x0E, which is the BIOS teletype function (int 0x10).
-This function prints the character in AL to the screen.
+* Label marking the start of the character-printing loop.
 
-int 0x10
-Calls BIOS video interrupt — in this case, using function 0x0E to print the character.
+### `lodsb`
 
-jmp print_loop
-Jumps back to print_loop: to get the next character and repeat the process.
+* Loads a byte from memory at `[SI]` into `AL`, then increments `SI`.
+* Equivalent to:
 
-hang:
-Label where we go when the message is done printing — this is where the bootloader halts.
+  ```asm
+  mov al, [si]
+  inc si
+  ```
 
-cli
-Clear Interrupts — disables hardware interrupts.
-Good practice before halting to prevent unexpected CPU activity.
+### `cmp al, 0`
 
-hlt
-Halt CPU — puts the CPU into a stopped state until the next external interrupt (which won’t come, since interrupts are disabled).
+* Compares the byte in `AL` with `0`.
+* We're checking for the **null terminator** to detect the end of the string.
 
-jmp hang
-Infinite loop — keeps jumping back to hang to halt forever.
-Prevents the CPU from running into garbage memory after hlt.
+### `je hang`
 
-message db 'Hello from bootloader!', 0
-Defines the string to print. Ends with a 0 (null terminator) so we know when to stop.
+* Jumps to `hang` if `AL == 0` — i.e., end of string.
+* Halts the program after printing is done.
 
-times 510-($-$$) db 0
-Pads the rest of the boot sector (up to 510 bytes) with zeros.
+### `mov ah, 0x0E`
 
-$ is current position
+* Prepares to call **BIOS teletype service** (`int 0x10`, function 0x0E).
+* `AH = 0x0E` tells BIOS to print the character in `AL`.
 
-$$ is the start of the file
-This ensures total size = 510 bytes before adding boot signature.
+### `int 0x10`
 
-dw 0xAA55
-This is the boot signature that BIOS looks for.
-It must be the last 2 bytes (bytes 511–512).
-If it’s missing, the BIOS won’t treat the sector as bootable.
+* Calls BIOS interrupt `0x10`, using the function specified in `AH`.
+* With `AH = 0x0E`, it **prints the character in AL to the screen**.
+
+### `jmp print_loop`
+
+* Jumps back to `print_loop:` to print the next character.
+
+## 🔁 End of Message Handling
+
+### `hang:`
+
+* Label for halting the CPU after the message is done printing.
+
+### `cli`
+
+* **Clear Interrupts**: disables all hardware interrupts.
+* Prevents unexpected CPU behavior before halting.
+
+### `hlt`
+
+* **Halt** the CPU — stops execution until the next hardware interrupt (which won’t come since interrupts are off).
+
+### `jmp hang`
+
+* Infinite loop to keep the CPU in a halted state.
+* Prevents it from running into garbage memory after `hlt`.
+
+## 📝 Message Declaration
+
+### `message db 'Hello from bootloader!', 0`
+
+* Defines a **null-terminated string**.
+* `0` at the end marks where the string ends (for `cmp al, 0` to work).
+
+## 🧱 Boot Sector Padding & Signature
+
+### `times 510-($-$$) db 0`
+
+* Pads the file with zeros so total size becomes **510 bytes**.
+* `$` = current position, `$$` = start of the file.
+
+### `dw 0xAA55`
+
+* The **magic boot signature** required by the BIOS.
+* Must be at bytes **511–512** of the boot sector.
+* If missing, BIOS won’t consider the sector bootable.
