@@ -102,12 +102,12 @@ mov qword [...] → move 8 bytes (64 bits)
 ```
 
 ## First 1 MB of RAM used in Real mode
-```
-| Hex Address Range   | Decimal Address Range | Memory Size Approx. | Memory Range (KB)   | Description                  |
-| ------------------- | --------------------- | ------------------- | ------------------- | ---------------------------- |
-| `0x00000–0x003FF`   | 0 – 1,023             | 1 KB                | 0 KB – 1 KB         | Interrupt Vector Table (IVT) |
-| `0x00400–0x004FF`   | 1,024 – 1,279         | 256 bytes           | 1 KB – 1.25 KB      | BIOS Data Area (BDA)         |
-| `0x00500–0x07BFF`   | 1,280 – 31,359        | \~30 KB             | 1.25 KB – 30.67 KB  | Generally safe for code/data |
-| `0x07C00–0x07DFF`   | 31,360 – 31,871       | 512 bytes           | 30.67 KB – 30.93 KB | Bootloader loaded here       |
-| `0x0A0000–0x0FFFFF` | 655,360 – 1,048,575   | 384 KB              | 640 KB – 1,024 KB   | Video memory, BIOS ROM, etc. |
-```
+
+| Hex Address Range   | Decimal Address Range | Memory Size Approx. | Memory Range (KB)   | Description                     | 
+| ------------------- | --------------------- | ------------------- | ------------------- | ------------------------------- |
+| `0x00000–0x003FF`   | 0 – 1,023             | 1 KB                | 0 KB – 1 KB         | Interrupt Vector Table (IVT)    |
+| `0x00400–0x004FF`   | 1,024 – 1,279         | 256 bytes           | 1 KB – 1.25 KB      | BIOS Data Area (BDA)            |
+| `0x00500–0x07BFF`   | 1,280 – 31,359        | \~30 KB             | 1.25 KB – 30.67 KB  | Generally safe for code/data    |
+| `0x07C00–0x07DFF`   | 31,360 – 31,871       | 512 bytes           | 30.67 KB – 30.93 KB | Bootloader loaded here          |
+| `0x07E00–0x09FFFF`  | 31,872 – 655,359      | 623 KB              | 30.93 KB – 640 KB   | Usually Reserved/Hardware areas |
+| `0x0A0000–0x0FFFFF` | 655,360 – 1,048,575   | 384 KB              | 640 KB – 1,024 KB   | Video memory, BIOS ROM, etc.    |
