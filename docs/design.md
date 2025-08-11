@@ -103,7 +103,7 @@ mov qword [...] → move 8 bytes (64 bits)
 
 ## First 1 MB of RAM used in Real mode
 
-| Hex Address Range   | Decimal Address Range | Memory Size Approx. | Memory Range (KB)   | Description                     | 
+| Hex Address Range   | Decimal Address Range | Memory Size Approx. | Memory Range (KB)   | Description                     |
 | ------------------- | --------------------- | ------------------- | ------------------- | ------------------------------- |
 | `0x00000–0x003FF`   | 0 – 1,023             | 1 KB                | 0 KB – 1 KB         | Interrupt Vector Table (IVT)    |
 | `0x00400–0x004FF`   | 1,024 – 1,279         | 256 bytes           | 1 KB – 1.25 KB      | BIOS Data Area (BDA)            |
