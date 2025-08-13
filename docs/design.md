@@ -111,3 +111,134 @@ mov qword [...] → move 8 bytes (64 bits)
 | `0x07C00–0x07DFF`   | 31,360 – 31,871       | 512 bytes           | 30.67 KB – 30.93 KB | Bootloader loaded here          |
 | `0x07E00–0x09FFFF`  | 31,872 – 655,359      | 623 KB              | 30.93 KB – 640 KB   | Usually Reserved/Hardware areas |
 | `0x0A0000–0x0FFFFF` | 655,360 – 1,048,575   | 384 KB              | 640 KB – 1,024 KB   | Video memory, BIOS ROM, etc.    |
+
+## Intel x64 registers
+Alright, let’s do **the full x86/x86-64 register map** — grouped by category — and I’ll explain what each one actually does, from ancient 16-bit days to modern 64-bit usage.
+
+### **1. General-Purpose Registers (GPRs)**
+
+These hold integer data, pointers, counters, function arguments, return values, etc.
+
+| 64-bit | 32-bit   | 16-bit   | 8-bit    | Purpose                                        |
+| ------ | -------- | -------- | -------- | ---------------------------------------------- |
+| RAX    | EAX      | AX       | AL/AH    | Accumulator — math ops, function return values |
+| RBX    | EBX      | BX       | BL/BH    | Base register — historically data pointer      |
+| RCX    | ECX      | CX       | CL/CH    | Counter — loops, shifts, string instructions   |
+| RDX    | EDX      | DX       | DL/DH    | Data register — I/O, math, division remainder  |
+| RSI    | ESI      | SI       | SIL      | Source index for string/memory ops             |
+| RDI    | EDI      | DI       | DIL      | Destination index for string/memory ops        |
+| RSP    | ESP      | SP       | SPL      | Stack pointer                                  |
+| RBP    | EBP      | BP       | BPL      | Base pointer (stack frame reference)           |
+| R8–R15 | R8D–R15D | R8W–R15W | R8B–R15B | Extra general-purpose registers in 64-bit mode |
+
+* **Note:** Writing to the 32-bit reg (e.g., `EAX`) zeroes the upper 32 bits of the 64-bit reg (`RAX`).
+* **High 8-bit registers** (AH, BH, CH, DH) are legacy; SPL/BPL/SIL/DIL and R8B–R15B were added in x86-64.
+
+### **2. Segment Registers**
+
+Hold *segment selectors* — used with an offset to calculate a physical/linear address.
+
+| Register | Purpose                                                                 |
+| -------- | ----------------------------------------------------------------------- |
+| CS       | Code Segment — where instructions are fetched from                      |
+| DS       | Data Segment — default for most memory accesses                         |
+| ES       | Extra Segment — extra data space, used by string/mem ops as destination |
+| SS       | Stack Segment — where the stack lives                                   |
+| FS       | General-purpose extra segment (modern: Thread Local Storage pointer)    |
+| GS       | General-purpose extra segment (modern: often kernel data base pointer)  |
+
+* **Modern 64-bit reality:** CS, DS, ES, SS are mostly fixed to flat addressing; FS and GS still used.
+
+### **3. Instruction Pointer**
+
+Points to the next instruction to execute.
+
+| 64-bit | 32-bit | 16-bit |
+| ------ | ------ | ------ |
+| RIP    | EIP    | IP     |
+
+* RIP-relative addressing in x86-64 lets you access nearby data without hardcoding full addresses.
+
+### **4. Flags Register**
+
+Stores status and control flags.
+
+| 64-bit | 32-bit | 16-bit |
+| ------ | ------ | ------ |
+| RFLAGS | EFLAGS | FLAGS  |
+
+Key bits:
+
+* **CF** (Carry Flag) — arithmetic carry/borrow
+* **ZF** (Zero Flag) — result was zero
+* **SF** (Sign Flag) — result negative
+* **OF** (Overflow Flag) — signed overflow
+* **IF** (Interrupt Enable) — allows CPU interrupts
+* **DF** (Direction Flag) — string ops increment/decrement indexes
+
+### **5. Floating-Point Unit (x87 FPU)**
+
+Legacy floating-point registers.
+
+| Register | Purpose                                                 |
+| -------- | ------------------------------------------------------- |
+| ST0–ST7  | 80-bit floating-point registers in a stack-based layout |
+
+* Still there, but replaced by SSE/AVX in modern code.
+
+### **6. MMX Registers** (Integer SIMD, legacy)
+
+| Register | Purpose                                           |
+| -------- | ------------------------------------------------- |
+| MM0–MM7  | 64-bit integer SIMD registers, alias with ST0–ST7 |
+
+### **7. SSE / AVX / AVX-512 Registers**
+
+Modern SIMD (vector) registers.
+
+| Register   | Width   | Purpose                              |
+| ---------- | ------- | ------------------------------------ |
+| XMM0–XMM31 | 128-bit | SSE floating-point & integer vectors |
+| YMM0–YMM31 | 256-bit | AVX vectors (extend XMM)             |
+| ZMM0–ZMM31 | 512-bit | AVX-512 vectors (extend YMM)         |
+
+### **8. Control Registers**
+
+Control CPU modes and paging.
+
+| Register | Purpose                                       |
+| -------- | --------------------------------------------- |
+| CR0      | Enables/disables protected mode, paging, etc. |
+| CR2      | Stores page fault linear address              |
+| CR3      | Holds page directory/table base address       |
+| CR4      | Enables extra features (PSE, PAE, SSE, etc.)  |
+| CR8      | Task priority register (x86-64 only)          |
+
+### **9. Debug Registers**
+
+Used for hardware breakpoints.
+
+| Register | Purpose              |
+| -------- | -------------------- |
+| DR0–DR3  | Breakpoint addresses |
+| DR6      | Debug status         |
+| DR7      | Debug control        |
+
+### **10. Task Register**
+
+| Register | Purpose                                                             |
+| -------- | ------------------------------------------------------------------- |
+| TR       | Holds TSS (Task State Segment) selector for hardware task switching |
+
+### **11. Model-Specific Registers (MSRs)**
+
+Special registers accessed via `RDMSR`/`WRMSR` for CPU configuration.
+Examples: IA32\_APIC\_BASE, IA32\_LSTAR (syscall entry), etc.
+
+#### TL;DR memory trick:
+
+Think of x86 registers in **layers**:
+
+1. *You* (programmer) mainly touch **GPRs, RIP, FLAGS**
+2. OS and compilers also mess with **FS/GS**, control regs, SIMD regs
+3. The rest (segment regs, x87, MMX) are mostly legacy
