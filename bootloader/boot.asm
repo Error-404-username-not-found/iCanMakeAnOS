@@ -21,9 +21,11 @@ print_loop:
 ; -----------------------
 
 print_done:
-    ; call enable_a20
+    call enable_a20
     call load_kernel_sectors
-    jmp jump_to_kernel
+    call load_gdt
+    call enable_pmode
+    jmp 0x08:pmode_main
 
 enable_a20:
     mov ax, 0x2401
@@ -32,9 +34,9 @@ enable_a20:
 
 load_kernel_sectors:
     ; define start location of kernel in RAM
-    mov ax, 0x0000
+    mov ax, 0x1000
     mov es, ax
-    mov bx, 0xAAAA
+    mov bx, 0x0000
     
     ; request BIOS read mode
     mov ah, 0x02
@@ -52,13 +54,46 @@ load_kernel_sectors:
     int 0x13
     ret
 
-jump_to_kernel:
-    jmp 0xAAAA  ; Transfer control to kernel program at 64KiB
+gdt_start:
+    dq 0x0000000000000000        ; null descriptor (mandatory)
+    dq 0x00CF9A000000FFFF        ; code segment descriptor 
+    dq 0x00CF92000000FFFF        ; data segment descriptor
+gdt_end:
 
-hang:
+gdt_descriptor:
+    dw gdt_end - gdt_start - 1
+    dd gdt_start
+
+load_gdt:
     cli
-    hlt
-    jmp hang
+    lgdt [gdt_descriptor]          ; load the GDTR register with GDT addr
+    ret
+
+enable_pmode:
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
+    ret
+
+; --------------------------
+; 32-bit Protected mode code
+; --------------------------
+
+[BITS 32]
+pmode_main:
+    ; Load data segments with data selector (0x10)
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    ; Setup stack pointer (pick some high memory address)
+    mov esp, 0x9FC00       ; just below 640KB mark (safe zone for stack)
+
+    ; jump to kernel entry
+    jmp 0x00010000
 
 ; -----------------------
 ; Data Section
