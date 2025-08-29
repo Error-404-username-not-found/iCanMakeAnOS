@@ -1,8 +1,11 @@
 [BITS 32]
-[org 0x10000]
+[extern kernel_main]
 
-mov byte [0xB8000], 'T'        ; start of VGA buffer
-mov byte [0xB8001], 0x2F       ; start of VGA buffer
+section .text
+global start
+start:
+  call kernel_main
+  jmp hang
 
 hang:
   hlt

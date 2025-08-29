@@ -1,1 +1,1 @@
-qemu-system-x86_64 -drive format=raw,file=mydisk.img
+qemu-system-x86_64 -drive format=raw,file=../build/bare_os.img
